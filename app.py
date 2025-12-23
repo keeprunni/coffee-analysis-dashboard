@@ -2,6 +2,20 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from streamlit_gsheets import GSheetsConnection
+
+
+# 建立連線 (它會自動去讀取 secrets.toml 裡的 gcp_service_account 分組)
+conn = st.connection("gsheets", type=GSheetsConnection)
+
+# 讀取 Google Sheet (請填入你的試算表網址)
+url = "https://docs.google.com/spreadsheets/d/1CAUGJLU_BGUzpH-UDNC3059ILwL1Dy7Y-DK9boN_DoE/edit#gid=0"
+# 修改這行代碼，加上快取時間（單位是秒，600秒 = 10分鐘）
+df = conn.read(spreadsheet=url, ttl=10)
+
+
+
+
 #1. 页面配置与字体设置
 st.set_page_config(page_title="咖啡店数据看板", layout="wide")
 plt.rcParams['font.sans-serif'] = ['SimHei']
@@ -9,12 +23,13 @@ plt.rcParams['font.sans-serif'] = ['SimHei']
 st.title("咖啡店业务数据实时分析")
 
 #2. 侧边栏：文件上传
-st.sidebar.header("数据管理")
-uploaded_file = st.sidebar.file_uploader("上传销售数据(CSV)", type="csv")
+# st.sidebar.header("数据管理")
+# uploaded_file = st.sidebar.file_uploader("上传销售数据(CSV)", type="csv")
 
-if uploaded_file is not None:
+# if uploaded_file is not None:
+if df is not None:
 	#3.读取数据
-	df = pd.read_csv(uploaded_file)
+	# df = pd.read_csv(uploaded_file)
 	df['交易时间'] = pd.to_datetime(df['交易时间'])
 	df['销售额'] = df['单价']*df['销售数量']
 	
